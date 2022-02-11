@@ -14,6 +14,7 @@
  *    limitations under the License.
  */
 /**
+ * 通过动态代理,生成一个执行对象，应该取名叫做proxy
  * Bings mapper interfaces with mapped statements.
  */
 package org.apache.ibatis.binding;
