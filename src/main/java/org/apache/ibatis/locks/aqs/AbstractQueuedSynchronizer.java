@@ -127,8 +127,20 @@ public class AbstractQueuedSynchronizer extends AbstractOwnableSynchronizer {
       }
     }
     if (next != null) {
-      LockSupport.park(next.thread);
+      LockSupport.unpark(next.thread);
     }
+  }
+
+  public boolean releaseShared(int arg) {
+    if (tryReleaseShared(arg)) {
+      doReleaseShared();
+      return true;
+    }
+    return false;
+  }
+
+  public boolean tryReleaseShared(int arg) {
+    return false;
   }
 
   public void doReleaseShared() {
@@ -137,8 +149,16 @@ public class AbstractQueuedSynchronizer extends AbstractOwnableSynchronizer {
       if (h != null && h != tail) {
         int ws = h.waitStatus;
         if (ws == Node.SIGNAL) {
-
+          if (!Node.compareAndSetWaitStatus(h, Node.SIGNAL, 0)) {
+            continue;
+          }
+          unparkSuccessor(h);
+        } else if (ws == 0 && !(Node.compareAndSetWaitStatus(h, 0, Node.PROPAGATE))) {
+          continue;
         }
+      }
+      if (h == head) {
+        break;
       }
     }
   }
